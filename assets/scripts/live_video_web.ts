@@ -82,8 +82,8 @@ export class LiveVideoWeb extends Component {
 
         this._video.style.left = '0px';
         this._video.style.top = '0px';
-        this._video.style.width = '100%';
-        this._video.style.height = '100%';
+        this._video.style.width = '0%';
+        this._video.style.height = '0%';
 
         this._video.autoplay = true;
         this._video.muted = true;  // 手機瀏覽器要求自動播放需靜音
