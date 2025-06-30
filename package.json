@@ -1,0 +1,10 @@
+{
+  "name": "livestream",
+  "uuid": "631e13d8-6666-430c-b176-88196d2c8f26",
+  "creator": {
+    "version": "3.8.6"
+  },
+  "dependencies": {
+    "hls.js": "^1.6.5"
+  }
+}
