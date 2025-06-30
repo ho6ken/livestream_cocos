@@ -469,10 +469,10 @@
       },
       "scale": 0.3914814814814815
     },
-    "5047902d-150f-4ae1-9c99-7ccfe8c1ec6b": {
+    "add81a8e-b51e-4a2e-b47c-1d606f49574a": {
       "position": {
-        "x": 893.7216626169029,
-        "y": 649.6990937394675,
+        "x": 791.9033333333333,
+        "y": 508.93,
         "z": 5000
       },
       "rotation": {
@@ -487,12 +487,62 @@
         "z": 0
       },
       "contentRect": {
-        "x": -1083.7148361227682,
-        "y": -663.0990262571476,
+        "x": 0,
+        "y": 0,
+        "width": 1050,
+        "height": 590.625
+      },
+      "scale": 0.546875
+    },
+    "eb6ad8b1-3291-448c-b30e-c2727b5a906f": {
+      "position": {
+        "x": 630.9183333333334,
+        "y": 387.575,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "contentRect": {
+        "x": 0,
+        "y": 0,
+        "width": 756,
+        "height": 425.25
+      },
+      "scale": 0.39375
+    },
+    "5047902d-150f-4ae1-9c99-7ccfe8c1ec6b": {
+      "position": {
+        "x": 1327.6590762145224,
+        "y": 394.9926335514483,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "contentRect": {
+        "x": 805.3287382368479,
+        "y": 133.8274645626111,
         "width": 1080,
         "height": 717
       },
-      "scale": 0.2730808298239522
+      "scale": 0.2871745887492587
     }
   },
   "camera-uuids": [
@@ -513,6 +563,8 @@
     "3696759c-139e-4a90-b03d-9238ce886c3d",
     "b34a4f57-7f7b-4fb3-ada5-a271be25f44f",
     "0dbbe294-fb3d-4ab3-aa45-de06d1ea2224",
+    "add81a8e-b51e-4a2e-b47c-1d606f49574a",
+    "eb6ad8b1-3291-448c-b30e-c2727b5a906f",
     "5047902d-150f-4ae1-9c99-7ccfe8c1ec6b"
   ],
   "camera": {
@@ -554,14 +606,15 @@
     "output_device": "__default_design__"
   },
   "game-view": {
-    "scaleValue": 56,
-    "sliderValue": 25,
+    "scaleValue": 76,
+    "sliderValue": 36,
     "devicesInfo": {
-      "name": "i18n:scene.game_view.design_resolution",
-      "type": "design",
-      "width": 1920,
-      "height": 1080
+      "name": "Apple iPhone XR; 11",
+      "type": "device",
+      "width": 414,
+      "height": 896
     },
-    "fullScreen": true
+    "fullScreen": true,
+    "rotate": true
   }
 }

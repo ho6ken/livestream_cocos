@@ -39,8 +39,10 @@ export class LiveVideoWeb extends Component {
         // 創建video player
         this.createVideo();
 
-        // 視窗發生變化時校正顯示位置
+        // 校正顯示位置
         screen.on('window-resize', this.adjustVideo, this);
+        screen.on('orientation-change', this.adjustVideo, this);
+        screen.on('fullscreen-change', this.adjustVideo, this);
     }
 
     /**
@@ -66,7 +68,10 @@ export class LiveVideoWeb extends Component {
             this._video.removeEventListener(`loadedmetadata`, this.onParsed.bind(this));
         }
 
+        // event
         screen.off('window-resize', this.adjustVideo, this); 
+        screen.off('orientation-change', this.adjustVideo, this); 
+        screen.off('fullscreen-change', this.adjustVideo, this); 
     }
 
     /**
