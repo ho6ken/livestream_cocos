@@ -1,4 +1,4 @@
-import { _decorator, Camera, Component, director, error, Node, screen, UITransform, view, warn } from 'cc';
+import { _decorator, Camera, Component, director, error, Node, screen, Size, UITransform, view, warn } from 'cc';
 import Hls from 'hls.js';
 
 const { ccclass, property } = _decorator;
@@ -109,21 +109,32 @@ export class LiveVideoWeb extends Component {
             return;
         }
 
-        // 用canvas大小與設計大小算出縮放比
-        let rect = canvas.getBoundingClientRect();
-        let size = view.getDesignResolutionSize();
-        let scaleX = rect.width / size.width;
-        let scaleY = rect.height / size.height;
+        let game = this.getGameSize(canvas);
+        let design = view.getDesignResolutionSize();
 
-        // 物件寬高
-        let trans = this.node.getComponent(UITransform);
-        let width = trans.width * scaleX;
-        let height = trans.height * scaleY;
+        // 縮放倍率
+        let scale = Math.max(
+            game.width / design.width,
+            game.height / design.height,
+        );
 
-        // 物件左上
+        // 依照縮放取得新的物件大小
+        let target = this.getComponent(UITransform);
+        let width = target.width * scale;
+        let height = target.height * scale;
+
+        let client = canvas.getBoundingClientRect();
         let pos = this.node.getWorldPosition();
-        let left = rect.left + pos.x * scaleX - width / 2;
-        let top = rect.top + pos.y * scaleY - height / 2;
+
+        // 依照縮放新的左位置
+        let left = client.left;                   // 網頁顯示範圍
+        left += (client.width - game.width) / 2;  // 遊戲顯示位置
+        left += pos.x * scale - width / 2;        // 物件在遊戲內的位置
+
+        // 依照縮放新的上位置
+        let top = client.top;                      // 網頁顯示範圍
+        top += (client.height - game.height) / 2;  // 遊戲顯示位置
+        top += pos.y * scale - height / 2;         // 物件在遊戲內的位置
 
         // 重設
         let style = this._video.style;
@@ -131,6 +142,22 @@ export class LiveVideoWeb extends Component {
         style.top = `${top}px`;
         style.width = `${width}px`;
         style.height = `${height}px`;
+    }
+
+    /**
+     * 取得遊戲經過變化後的真正大小
+     */
+    private getGameSize(canvas: any): Size {
+        let client = canvas.getBoundingClientRect();
+        let design = view.getDesignResolutionSize();
+
+        // 縮放倍率
+        let scale = Math.min(
+            client.width / design.width,
+            client.height / design.height,
+        );
+
+        return new Size(design.width * scale, design.height * scale);
     }
 
     /**
