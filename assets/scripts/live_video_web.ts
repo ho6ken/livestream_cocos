@@ -1,4 +1,4 @@
-import { _decorator, Camera, Component, director, error, Node, screen, warn } from 'cc';
+import { _decorator, Camera, Component, director, error, Node, screen, UITransform, view, warn } from 'cc';
 import Hls from 'hls.js';
 
 const { ccclass, property } = _decorator;
@@ -37,16 +37,17 @@ export class LiveVideoWeb extends Component {
         this._camera = director.getScene().getComponentInChildren(Camera) ?? null;
 
         // 創建video player
-        this.createPlayer();
+        this.createVideo();
 
         // 視窗發生變化時校正顯示位置
-        screen.on('window-resize', this.adjustPos, this);
+        screen.on('window-resize', this.adjustVideo, this);
     }
 
     /**
      * 
      */
     protected start(): void {
+        this.adjustVideo();
         this.url && this.playVideo(this.url);
     }
 
@@ -65,18 +66,19 @@ export class LiveVideoWeb extends Component {
             this._video.removeEventListener(`loadedmetadata`, this.onParsed.bind(this));
         }
 
-        screen.off('window-resize', this.adjustPos, this); 
+        screen.off('window-resize', this.adjustVideo, this); 
     }
 
     /**
      * 創建video player
      */
-    private createPlayer(): void {
+    private createVideo(): void {
         this._video = document.createElement('video');
         this._video.style.position = 'absolute';
         this._video.style.pointerEvents = 'none';  // 避免擋住ui點擊
         this._video.style.zIndex = '999';
         this._video.style.backgroundColor = 'black';
+        this._video.style.objectFit = 'cover';
 
         this._video.style.left = '0px';
         this._video.style.top = '0px';
@@ -94,8 +96,41 @@ export class LiveVideoWeb extends Component {
     /**
      * 校正video顯示位置
      */
-    private adjustPos(): void {
-        // TODO
+    private adjustVideo(): void {
+        if (!this._video || ! this._camera) {
+            warn(`adjust video failed, video or camera is null.`);
+            return;
+        }
+
+        let canvas = document.querySelector('canvas');
+
+        if (!canvas) {
+            warn(`adjust video failed, canvas is null.`);
+            return;
+        }
+
+        // 用canvas大小與設計大小算出縮放比
+        let rect = canvas.getBoundingClientRect();
+        let size = view.getDesignResolutionSize();
+        let scaleX = rect.width / size.width;
+        let scaleY = rect.height / size.height;
+
+        // 物件寬高
+        let trans = this.node.getComponent(UITransform);
+        let width = trans.width * scaleX;
+        let height = trans.height * scaleY;
+
+        // 物件左上
+        let pos = this.node.getWorldPosition();
+        let left = rect.left + pos.x * scaleX - width / 2;
+        let top = rect.top + pos.y * scaleY - height / 2;
+
+        // 重設
+        let style = this._video.style;
+        style.left = `${left}px`;
+        style.top = `${top}px`;
+        style.width = `${width}px`;
+        style.height = `${height}px`;
     }
 
     /**
