@@ -1,4 +1,4 @@
-import { _decorator, Camera, Component, director, error, Node, screen, Size, UITransform, view, warn } from 'cc';
+import { _decorator, Camera, Component, director, error, Node, screen, Size, sys, UITransform, view, warn } from 'cc';
 import Hls from 'hls.js';
 
 const { ccclass, property } = _decorator;
@@ -34,10 +34,16 @@ export class LiveVideoWeb extends Component {
      * 
      */
     protected onLoad(): void {
+        // 只支援web
+        if (sys.isNative || !sys.isBrowser) {
+            return;
+        }
+
         this._camera = director.getScene().getComponentInChildren(Camera) ?? null;
 
         // 創建video player
-        this.createVideo();
+        // 依規定auto play時必須靜音, 因此改為點擊畫面後開始播放
+        document.body.addEventListener(`click`, this.onClick.bind(this), { once: true });
 
         // 校正顯示位置
         screen.on('window-resize', this.adjustVideo, this);
@@ -48,15 +54,12 @@ export class LiveVideoWeb extends Component {
     /**
      * 
      */
-    protected start(): void {
-        this.adjustVideo();
-        this.url && this.playVideo(this.url);
-    }
-
-    /**
-     * 
-     */
     protected onDestroy(): void {
+        // event
+        screen.off('window-resize', this.adjustVideo, this); 
+        screen.off('orientation-change', this.adjustVideo, this); 
+        screen.off('fullscreen-change', this.adjustVideo, this); 
+
         // hls
         if (Hls.isSupported()) {
             this._hls.off(Hls.Events.MANIFEST_PARSED, this.onParsed.bind(this));
@@ -67,11 +70,6 @@ export class LiveVideoWeb extends Component {
         else if (this._video.canPlayType(`application/vnd.apple.mpegurl`)) {
             this._video.removeEventListener(`loadedmetadata`, this.onParsed.bind(this));
         }
-
-        // event
-        screen.off('window-resize', this.adjustVideo, this); 
-        screen.off('orientation-change', this.adjustVideo, this); 
-        screen.off('fullscreen-change', this.adjustVideo, this); 
     }
 
     /**
@@ -85,13 +83,16 @@ export class LiveVideoWeb extends Component {
         this._video.style.backgroundColor = 'black';
         this._video.style.objectFit = 'cover';
 
+        // 初始時先不顯示防止畫面閃動
         this._video.style.left = '0px';
         this._video.style.top = '0px';
         this._video.style.width = '0%';
         this._video.style.height = '0%';
 
-        this._video.autoplay = true;
-        this._video.muted = true;  // 手機瀏覽器要求自動播放需靜音
+        // 手機瀏覽器要求自動播時必須靜音
+        this._video.autoplay = false;
+        this._video.muted = false;  
+
         this._video.controls = true;
         this._video.playsInline = true;
 
@@ -201,7 +202,9 @@ export class LiveVideoWeb extends Component {
      * manifest解析完成
      */
     private onParsed(): void {
-        this._video.play();
+        this._video.play().catch(e => {
+            error(`play video failed.`, e);
+        });
     }
 
     /**
@@ -227,5 +230,18 @@ export class LiveVideoWeb extends Component {
                 error(`hls play video faild, close hls.`, this.url, data.type);
                 break;
         }
+    }
+
+    /**
+     * 點擊畫面
+     * @summary 生成
+     */
+    private onClick(): void {
+        this.createVideo();
+
+        setTimeout(() => {
+            this.url && this.playVideo(this.url);
+            this.adjustVideo();
+        }, 0);
     }
 }
