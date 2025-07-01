@@ -1,4 +1,4 @@
-import { _decorator, Camera, Component, director, error, Node, screen, Size, sys, UITransform, view, warn } from 'cc';
+import { _decorator, Camera, Component, director, error, Node, screen, size, Size, sys, UITransform, view, warn } from 'cc';
 import Hls from 'hls.js';
 
 const { ccclass, property } = _decorator;
@@ -39,10 +39,10 @@ export class LiveVideoWeb extends Component {
             return;
         }
 
-        this._camera = director.getScene().getComponentInChildren(Camera) ?? null;
+        this._camera = director.getScene().getComponentInChildren(Camera);
 
-        // 創建video player
-        // 依規定auto play時必須靜音, 因此改為點擊畫面後開始播放
+        // 因瀏覽器要求自動播放時必須靜音, 因此改為以下做法
+        // 點擊畫面時創建video player並開始播放
         document.body.addEventListener(`click`, this.onClick.bind(this), { once: true });
 
         // 校正顯示位置
@@ -89,7 +89,7 @@ export class LiveVideoWeb extends Component {
         this._video.style.width = '0%';
         this._video.style.height = '0%';
 
-        // 手機瀏覽器要求自動播時必須靜音
+        // 瀏覽器要求自動播放時必須靜音
         this._video.autoplay = false;
         this._video.muted = false;  
 
@@ -115,55 +115,55 @@ export class LiveVideoWeb extends Component {
             return;
         }
 
-        let game = this.getGameSize(canvas);
+        let real = this.getRealSize(canvas);
         let design = view.getDesignResolutionSize();
 
         // 縮放倍率
         let scale = Math.max(
-            game.width / design.width,
-            game.height / design.height,
+            real.width / design.width,
+            real.height / design.height,
         );
 
-        // 依照縮放取得新的物件大小
-        let target = this.getComponent(UITransform);
-        let width = target.width * scale;
-        let height = target.height * scale;
+        // 物件真實大小
+        let node = this.getComponent(UITransform);
+        let nodeW = node.width * scale;
+        let nodeH = node.height * scale;
 
-        let client = canvas.getBoundingClientRect();
+        let bound = canvas.getBoundingClientRect();
         let pos = this.node.getWorldPosition();
 
-        // 依照縮放新的左位置
-        let left = client.left;                   // 網頁顯示範圍
-        left += (client.width - game.width) / 2;  // 遊戲顯示位置
-        left += pos.x * scale - width / 2;        // 物件在遊戲內的位置
+        // 新的左位置
+        let left = bound.left;                   // 網頁左上
+        left += (bound.width - real.width) / 2;  // canvas左上
+        left += pos.x * scale - nodeW / 2;       // 物件在canvas中的位置
 
-        // 依照縮放新的上位置
-        let top = client.top;                      // 網頁顯示範圍
-        top += (client.height - game.height) / 2;  // 遊戲顯示位置
-        top += pos.y * scale - height / 2;         // 物件在遊戲內的位置
+        // 新的上位置
+        let top = bound.top;                      // 網頁左上
+        top += (bound.height - real.height) / 2;  // canvas左上
+        top += pos.y * scale - nodeH / 2;         // 物件在canvas中的位置
 
-        // 重設
+        // 重設顯示位置
         let style = this._video.style;
         style.left = `${left}px`;
         style.top = `${top}px`;
-        style.width = `${width}px`;
-        style.height = `${height}px`;
+        style.width = `${nodeW}px`;
+        style.height = `${nodeH}px`;
     }
 
     /**
-     * 取得遊戲經過變化後的真正大小
+     * 取得設計分辨率變化後的真實大小
      */
-    private getGameSize(canvas: any): Size {
-        let client = canvas.getBoundingClientRect();
+    private getRealSize(canvas: any): Size {
+        let bound = canvas.getBoundingClientRect();
         let design = view.getDesignResolutionSize();
 
         // 縮放倍率
         let scale = Math.min(
-            client.width / design.width,
-            client.height / design.height,
+            bound.width / design.width,
+            bound.height / design.height,
         );
 
-        return new Size(design.width * scale, design.height * scale);
+        return size(design.width * scale, design.height * scale);
     }
 
     /**
@@ -234,7 +234,6 @@ export class LiveVideoWeb extends Component {
 
     /**
      * 點擊畫面
-     * @summary 生成
      */
     private onClick(): void {
         this.createVideo();
